@@ -367,6 +367,7 @@ module "container_registry" {
   tags                                        = var.tags
   custom_container_registry_images            = var.custom_container_registry_images
   zone_redundancy_enabled                     = var.zone_redundancy_enabled
+  #FIXME does diangnostic settings work with the new module?
 }
 
 resource "time_sleep" "delay_after_container_image_build" {
