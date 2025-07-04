@@ -50,20 +50,20 @@ variable "container_registry_diagnostic_settings" {
     marketplace_partner_resource_id          = optional(string, null)
   }))
   default     = {
-    default = {
-      acr-all = {
-        name                                     = "acr-all"
-        log_categories                           = [] #["ContainerRegistryLoginEvents", "ContainerRegistryRepositoryEvents"]
-        log_groups                               = ["allLogs"]
-        metric_categories                        = ["AllMetrics"]
-        log_analytics_destination_type           = "Dedicated"
-        workspace_resource_id                    = module.log.resource.workspace_id
-        storage_account_resource_id              = null
-        event_hub_authorization_rule_resource_id = null
-        event_hub_name                           = null
-        marketplace_partner_resource_id          = null
-      }
-    }
+    # default = {
+    #   acr-all = {
+    #     name                                     = "acr-all"
+    #     log_categories                           = [] #["ContainerRegistryLoginEvents", "ContainerRegistryRepositoryEvents"]
+    #     log_groups                               = ["allLogs"]
+    #     metric_categories                        = ["AllMetrics"]
+    #     log_analytics_destination_type           = "Dedicated"
+    #     workspace_resource_id                    = module.log.resource.workspace_id
+    #     storage_account_resource_id              = null
+    #     event_hub_authorization_rule_resource_id = null
+    #     event_hub_name                           = null
+    #     marketplace_partner_resource_id          = null
+    #   }
+    # }
   }
   description = <<DESCRIPTION
   A map of diagnostic settings to create on the Container Registry. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
