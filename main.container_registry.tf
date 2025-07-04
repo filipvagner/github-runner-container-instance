@@ -343,9 +343,9 @@ module "container_registry" {
   source                                      = "./modules/container-registry"
   location                                    = var.location
   container_registry_name                     = var.container_registry_name
-  resource_group_name                         = var.resource_group_name
+  resource_group_name                         = module.rg.name
   container_registry_sku                      = var.container_registry_sku
-  user_assigned_managed_identity_principal_id = var.user_assigned_managed_identity_principal_id
+  user_assigned_managed_identity_principal_id = azurerm_user_assigned_identity.id.principal_id
   public_network_access_enabled               = var.public_network_access_enabled
   container_registry_subnet_id                = try(var.container_registry_subnet_id)
   container_registry_private_endpoints        = try(var.container_registry_private_endpoints)
