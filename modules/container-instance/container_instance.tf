@@ -12,7 +12,7 @@ resource "azurerm_container_group" "this" {
     cpu                          = var.container_cpu
     image                        = "${var.container_registry_login_server}/${var.container_image}"
     memory                       = var.container_memory
-    name                         = var.container_name
+    name                         = var.container_instance_name
     cpu_limit                    = var.container_cpu_limit
     environment_variables        = var.environment_variables
     memory_limit                 = var.container_memory_limit
