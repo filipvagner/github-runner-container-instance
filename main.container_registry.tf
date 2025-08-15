@@ -49,7 +49,22 @@ variable "container_registry_diagnostic_settings" {
     event_hub_name                           = optional(string, null)
     marketplace_partner_resource_id          = optional(string, null)
   }))
-  default     = {}
+  default     = {
+    # default = {
+    #   acr-all = {
+    #     name                                     = "acr-all"
+    #     log_categories                           = [] #["ContainerRegistryLoginEvents", "ContainerRegistryRepositoryEvents"]
+    #     log_groups                               = ["allLogs"]
+    #     metric_categories                        = ["AllMetrics"]
+    #     log_analytics_destination_type           = "Dedicated"
+    #     workspace_resource_id                    = module.log.resource.workspace_id
+    #     storage_account_resource_id              = null
+    #     event_hub_authorization_rule_resource_id = null
+    #     event_hub_name                           = null
+    #     marketplace_partner_resource_id          = null
+    #   }
+    # }
+  }
   description = <<DESCRIPTION
   A map of diagnostic settings to create on the Container Registry. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
   
@@ -343,15 +358,16 @@ module "container_registry" {
   source                                      = "./modules/container-registry"
   location                                    = var.location
   container_registry_name                     = var.container_registry_name
-  resource_group_name                         = var.resource_group_name
+  resource_group_name                         = module.rg.name
   container_registry_sku                      = var.container_registry_sku
-  user_assigned_managed_identity_principal_id = var.user_assigned_managed_identity_principal_id
+  user_assigned_managed_identity_principal_id = azurerm_user_assigned_identity.id.principal_id
   public_network_access_enabled               = var.public_network_access_enabled
   container_registry_subnet_id                = try(var.container_registry_subnet_id)
   container_registry_private_endpoints        = try(var.container_registry_private_endpoints)
   tags                                        = var.tags
   custom_container_registry_images            = var.custom_container_registry_images
   zone_redundancy_enabled                     = var.zone_redundancy_enabled
+  #FIXME does diangnostic settings work with the new module?
 }
 
 resource "time_sleep" "delay_after_container_image_build" {

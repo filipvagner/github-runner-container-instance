@@ -11,10 +11,10 @@ variable "container_registry_login_server" {
   default     = null
 }
 
-variable "user_assigned_managed_identity_id" {
-  type        = string
-  description = "ID of the user-assigned managed identity"
-}
+# variable "user_assigned_managed_identity_id" {
+#   type        = string
+#   description = "ID of the user-assigned managed identity"
+# }
 
 variable "availability_zones" {
   type        = list(string)
@@ -72,7 +72,7 @@ variable "sensitive_environment_variables" {
   sensitive   = true
 }
 
-variable "subnet_id" {
+variable "container_instance_subnet_id" {
   type        = string
   default     = null
   description = "ID of the subnet"
@@ -103,22 +103,22 @@ variable "container_instance_sensitive_environment_variables" {
   description = "List of additional sensitive environment variables to pass to the container."
 }
 
-variable "container_instance_workspace_id" {
-  type        = string
-  default     = null
-  description = "The Workspace ID of the Log Analytics Workspace."
-}
+# variable "container_instance_workspace_id" {
+#   type        = string
+#   default     = null
+#   description = "The Workspace ID of the Log Analytics Workspace."
+# }
 
-variable "container_instance_workspace_key" {
-  type        = string
-  default     = null
-  description = "The Log Analytics Workspace key to access."
-}
+# variable "container_instance_workspace_key" {
+#   type        = string
+#   default     = null
+#   description = "The Log Analytics Workspace key to access."
+# }
 
 variable "container_instance_count" {
   type        = number
   description = "The number of container instances to create"
-  default     = 1
+  default     = null
 }
 
 variable "container_instance_name" {
@@ -136,7 +136,7 @@ variable "container_instance_use_availability_zones" {
 locals {
   container_registry_login_server = var.container_registry_login_server != null ? var.container_registry_login_server : "${var.container_registry_name}.azurecr.io"
   container_image                 = var.container_image != null ? var.container_image : values(var.custom_container_registry_images)[0].image_names[0]
-  container_instances = {
+  container_instances = var.container_instance_count == null ? {} : {
     for instance in range(0, var.container_instance_count) : instance => {
       name               = "${var.container_instance_name}-${instance + 1}"
       availability_zones = [(instance % 3) + 1]
@@ -146,12 +146,12 @@ locals {
 
 module "container_instance" {
   source   = "./modules/container-instance"
-  for_each = local.container_instances
+  for_each = var.container_instance_count != null ? local.container_instances : {}
 
   location                = var.location
-  resource_group_name     = var.resource_group_name
+  resource_group_name     = module.rg.name
   container_instance_name = each.value.name
-  container_name          = var.container_instance_name
+  container_name          = var.container_instance_name #FIXME container name should be derived from container_instance_name because in logs in case of multiple instances it will be the same
   container_image         = local.container_image
   environment_variables = merge(
     var.environment_variables,
@@ -161,12 +161,12 @@ module "container_instance" {
   )
   sensitive_environment_variables   = var.sensitive_environment_variables
   use_private_networking            = var.use_private_networking
-  subnet_id                         = try(var.subnet_id, null)
+  subnet_id                         = try(var.container_instance_subnet_id, null)
   availability_zones                = var.container_instance_use_availability_zones ? each.value.availability_zones : null
-  user_assigned_managed_identity_id = var.user_assigned_managed_identity_id
+  user_assigned_managed_identity_id = azurerm_user_assigned_identity.id.id
   container_registry_login_server   = local.container_registry_login_server
-  container_instance_workspace_id   = var.container_instance_workspace_id
-  container_instance_workspace_key  = var.container_instance_workspace_key
+  container_instance_workspace_id   = module.log.resource.workspace_id
+  container_instance_workspace_key  = module.log.resource.primary_shared_key
 
   depends_on = [module.container_registry, time_sleep.delay_after_container_image_build]
 }
