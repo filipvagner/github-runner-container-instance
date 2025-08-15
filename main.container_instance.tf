@@ -136,11 +136,11 @@ variable "container_instance_use_availability_zones" {
 locals {
   container_registry_login_server = var.container_registry_login_server != null ? var.container_registry_login_server : "${var.container_registry_name}.azurecr.io"
   container_image                 = var.container_image != null ? var.container_image : values(var.custom_container_registry_images)[0].image_names[0]
-  container_instances = {
+  container_instances = var.container_instance_count == null ? {} : {
     for instance in range(0, var.container_instance_count) : instance => {
       name               = "${var.container_instance_name}-${instance + 1}"
       availability_zones = [(instance % 3) + 1]
-    } if var.container_instance_count != null
+    }
   }
 }
 
