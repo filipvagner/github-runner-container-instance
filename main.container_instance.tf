@@ -140,7 +140,7 @@ locals {
     for instance in range(0, var.container_instance_count) : instance => {
       name               = "${var.container_instance_name}-${instance + 1}"
       availability_zones = [(instance % 3) + 1]
-    }
+    } if var.container_instance_count != null
   }
 }
 
