@@ -118,7 +118,7 @@ variable "container_instance_sensitive_environment_variables" {
 variable "container_instance_count" {
   type        = number
   description = "The number of container instances to create"
-  default     = 1
+  default     = null
 }
 
 variable "container_instance_name" {
