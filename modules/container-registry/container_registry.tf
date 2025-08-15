@@ -82,13 +82,12 @@ resource "azurerm_container_registry" "this" {
 
 resource "azapi_update_resource" "acr_update" {
   type        = "Microsoft.ContainerRegistry/registries@2025-05-01-preview"
-  name        = var.container_registry_name
   resource_id = azurerm_container_registry.this.id
-  body = jsonencode({
+  body = {
     properties = {
       networkRuleBypassAllowedForTasks = true
     }
-  })
+  }
 
   depends_on = [ 
     azurerm_container_registry.this
