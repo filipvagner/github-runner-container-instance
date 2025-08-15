@@ -146,7 +146,7 @@ locals {
 
 module "container_instance" {
   source   = "./modules/container-instance"
-  for_each = var.container_instance_count > 1 ? local.container_instances : {}
+  for_each = var.container_instance_count != null ? local.container_instances : {}
 
   location                = var.location
   resource_group_name     = module.rg.name
