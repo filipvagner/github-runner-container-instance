@@ -80,6 +80,21 @@ resource "azurerm_container_registry" "this" {
   }
 }
 
+resource "azapi_update_resource" "acr_update" {
+  type        = "Microsoft.ContainerRegistry/registries@2025-05-01-preview"
+  name        = var.container_registry_name
+  resource_id   = subazurerm_container_registry.this.id
+  body = jsonencode({
+    properties = {
+      networkRuleBypassAllowedForTasks = true
+    }
+  })
+
+  depends_on = [ 
+    azurerm_container_registry.this
+  ]
+}
+
 resource "azurerm_management_lock" "this" {
   count = var.container_registry_lock != null ? 1 : 0
 
@@ -192,6 +207,10 @@ resource "azurerm_container_registry_task" "this" {
       identity     = "[system]"
     }
   }
+
+  depends_on = [
+    azapi_update_resource.acr_update
+  ]
 }
 
 resource "azurerm_container_registry_task_schedule_run_now" "this" {
@@ -199,7 +218,10 @@ resource "azurerm_container_registry_task_schedule_run_now" "this" {
 
   container_registry_task_id = azurerm_container_registry_task.this[each.key].id
 
-  depends_on = [azurerm_role_assignment.container_registry_push_for_task]
+  depends_on = [
+    azurerm_role_assignment.container_registry_push_for_task,
+    azapi_update_resource.acr_update
+  ]
 
   lifecycle {
     replace_triggered_by = [azurerm_container_registry_task.this]
